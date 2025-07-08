@@ -7,6 +7,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    //has many is not needed for given database table structure so i cannot define relation here 
 
     public function getJWTIdentifier()
     {
