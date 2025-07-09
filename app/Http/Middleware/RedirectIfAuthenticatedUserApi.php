@@ -15,22 +15,17 @@ class RedirectIfAuthenticatedUserApi
     {
         try {
         $token = $request->bearerToken();
+            if (!$token) {
+                throw new JWTException('Token not provided');
+            }
 
-        if (!$token) {
-            throw new JWTException('Token not provided');
-        }
-
-        $user = JWTAuth::parseToken()->authenticate(); 
-        if (!$user) {
-            throw new Exception('User not found.');
-        }
-        if ($user->status !== 'Y') {
-            throw new Exception('User is inactive.');
-        }
-            $userId =$user->userid;
-            $request->merge([
-                'userid' => $userId,
-            ]);
+            $user = JWTAuth::parseToken()->authenticate(); 
+            if (!$user) {
+                throw new Exception('User not found.');
+            }
+            if ($user->status !== 'Y') {
+                throw new Exception('User is inactive.');
+            }
         } 
         
         catch (TokenExpiredException $e) {
