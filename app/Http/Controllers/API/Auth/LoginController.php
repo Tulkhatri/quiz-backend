@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\API\AppController;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\Common;
+use App\Models\Common\Common;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Auth;
  * @OA\Info(
  *    title="Quiz",
  *    version="1.0",
- * )
+ * ),
+ *  security={{ "bearerAuth": {} }}
  */
 
 class LoginController extends AppController
@@ -22,7 +23,7 @@ class LoginController extends AppController
 * @OA\Post(
 *     path="/api/login",
 *     operationId="Login",
-*     tags={"Login"},
+*     tags={"Auth"},
 *     summary="User Login",
 *     description="User Login here",
 *     @OA\RequestBody(
@@ -87,8 +88,8 @@ class LoginController extends AppController
                         throw new Exception('Invalid mobile number or password.');
                     }
                      $token = auth('authapi')->attempt($credentials);
-
-
+                    $this->response=true;
+                    
                 }  catch (QueryException $e) {
                     $status = 500;
                     $message = $this->queryMessage;
@@ -96,7 +97,7 @@ class LoginController extends AppController
                     $status = 401;
                     $message = $e->getMessage();
                 }
-                return Common::getJsonData($status,$message,['token'=>$token]);
+                return Common::getJsonData($status,$message,$this->response,'token',$token);
             }
 
 
