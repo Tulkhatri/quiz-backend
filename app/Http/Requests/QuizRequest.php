@@ -25,7 +25,8 @@ class QuizRequest extends FormRequest
             'title'=>'required|string|max:255',
             'category_id'=>'required',
             'difficulty_level_id'=>'required',
-            'time_limit_minutes'=>'required'
+            'time_limit_minutes'=>'required',
+            'id'=>'nullable'
              ];
     }
 
