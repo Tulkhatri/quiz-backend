@@ -57,5 +57,5 @@ Route::group(['middleware' => 'authapi'], function () {
              
     });
 
-    Route::post('/logout', [LoginController::class, 'logout']);
+    Route::get('/logout', [LoginController::class, 'logout']);
 });

@@ -105,8 +105,7 @@ class LoginController extends AppController
         public function logout()
         {
             auth('authapi')->logout();
-
-            return response()->json(['message' => 'Successfully logged out']);
+            return Common::getJsonData(200,'Successfully logged out',true);
         }
      
     }

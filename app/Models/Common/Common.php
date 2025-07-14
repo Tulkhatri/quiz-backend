@@ -17,10 +17,10 @@ class Common extends Model
              if (empty($post['insertArray']) || empty($post['table'])) {
                  return false;
             }
-
-            if (!empty($post['editid'])) {
+                    
+            if (!empty($post['id'])) {
             $result = DB::table($post['table'])
-                ->where('id', $post['editid'])
+                ->where('id', $post['id'])
                 ->update($post['insertArray']);
 
             } else {
@@ -58,10 +58,12 @@ class Common extends Model
             $array = [
                 'status' => $status,
                 'message' => $message,
-                'response' => $response
             ];
-            if (!empty($otherkey)) {
+            if (!empty($otherval)) {
                 $array[$otherkey] = $otherval;
+            }
+            if(!empty($response)){
+                 $array['response'] = $response;
             }
         return response()->json($array, $status); 
     }
