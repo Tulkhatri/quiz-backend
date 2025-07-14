@@ -114,18 +114,17 @@ class CategoryController extends AppController
  * )
  */
 
-public function save(CategoryRequest $request,$id = null) {
+public function save(CategoryRequest $request) {
     try{
         $post =$request->validated();
         $userid= Auth::user()->id;
         $post['table'] = 'categories';
-        $post['editid'] = !empty($id) ? $id : '';
-
+        $post['id'] = !empty($post['id']) ? $post['id'] : '';
         $insertArray = [
                      'name' => $post['name'],
                      ];
 
-            if(!empty($post['editid'])){
+            if(!empty($post['id'])){
                 $insertArray['updated_by'] = $userid;
                 $insertArray['updated_at'] = date('Y-m-d H:i:s');
             } else {
@@ -134,14 +133,13 @@ public function save(CategoryRequest $request,$id = null) {
             }
 
             $post['insertArray'] = $insertArray;
-
             DB::beginTransaction();
             $isSaved = Common::saveData($post);
                 if (!$isSaved) {
                     throw new Exception ("Couldn't save data.Please, try again.", 1);
                 }
                 $this->response=true;
-                if(empty($post['editid'])){
+                if(empty($post['id'])){
                     $this->message="Data inserted successfully";
                 }else{
                     $this->message="Data Updated successfully";
@@ -269,7 +267,6 @@ public function delete($id){
             $post['userid']=Auth::user()->id;
             $post['table'] = 'categories';
             $post['deleteid'] = !empty($id) ? $id : '';
-          
             DB::beginTransaction();
 
             $isDelete = Common::deleteData($post);

@@ -141,12 +141,12 @@ class QuizController extends AppController
  * )
  */
 
- public function save(QuizRequest $request,$id = null) {
+ public function save(QuizRequest $request) {
     try{
         $post =$request->validated();
         $userid= Auth::user()->id;
         $post['table'] = 'quizzes';
-        $post['editid'] = !empty($id) ? $id : '';
+        $post['id'] = !empty($post['id']) ? $post['id'] : '';
 
         $insertArray = [
                      'title' => $post['title'],
@@ -155,7 +155,7 @@ class QuizController extends AppController
                      'time_limit_minutes' => $post['time_limit_minutes'],
                      ];
 
-            if(!empty($post['editid'])){
+            if(!empty($post['id'])){
                 $insertArray['updated_by'] = $userid;
                 $insertArray['updated_at'] = date('Y-m-d H:i:s');
             } else {
@@ -171,7 +171,7 @@ class QuizController extends AppController
                     throw new Exception ("Couldn't save data. Please, try again.", 1);
                 }
                 $this->response=true;
-                if(empty($post['editid'])){
+                if(empty($post['id'])){
                     $this->message="Data inserted successfully";
                 }else{
                     $this->message="Data Updated successfully";
@@ -256,8 +256,8 @@ public function list() {
                 $mappedData[] = [
                     'id' => $quiz->id,
                     'title' => $quiz->title,
-                    'category_name' => $quiz->category->name ?? null,
-                    'difficulty_level_name' => $quiz->difficultyLevel->name ?? null,
+                    'category_id' => $quiz->category->name ?? null,
+                    'difficulty_level_id' => $quiz->difficultyLevel->name ?? null,
                     'time_limit_minutes' => $quiz->time_limit_minutes,
                 ];
         }
