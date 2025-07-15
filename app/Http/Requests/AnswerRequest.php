@@ -25,6 +25,7 @@ class AnswerRequest extends FormRequest
             'question_id'=>'required',
             'answer_text'=>'required|string',
             'is_correct'=>'required|string',
+            'id'=>'nullable',
              ];
     }
        public function messages(): array

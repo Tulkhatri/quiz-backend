@@ -133,7 +133,7 @@ class AnswerController extends AppController
         $post =$request->validated();
         $userid= Auth::user()->id;
         $post['table'] = 'answers';
-        $post['editid'] = !empty($id) ? $id : '';
+        $post['id'] = !empty($post['id']) ?$post['id'] : '';
 
         $insertArray = [
                      'question_id' => $post['question_id'],
@@ -141,7 +141,7 @@ class AnswerController extends AppController
                      'is_correct' => $post['is_correct'],
                      ];
 
-            if(!empty($post['editid'])){
+            if(!empty($post['id'])){
                 $insertArray['updated_by'] = $userid;
                 $insertArray['updated_at'] = date('Y-m-d H:i:s');
             } else {
@@ -157,7 +157,7 @@ class AnswerController extends AppController
                     throw new Exception ("Couldn't save data. Please, try again.", 1);
                 }
                 $this->response=true;
-                if(empty($post['editid'])){
+                if(empty($post['id'])){
                     $this->message="Data inserted successfully";
                 }else{
                     $this->message="Data Updated successfully";
@@ -240,6 +240,7 @@ public function list() {
            foreach ($data as $answer) {
                 $mappedData[] = [
                     'id' => $answer->id,
+                    'question_id' => $answer->question->id ?? null,
                     'question' => $answer->question->question_text ?? null,
                     'answer_text' => $answer->answer_text,
                     'is_correct' => $answer->is_correct,
@@ -299,9 +300,8 @@ public function delete($id){
     try{
             $post=[];
             $post['userid']=Auth::user()->id;
-            $post['table'] = 'answer';
+            $post['table'] = 'answers';
             $post['deleteid'] = !empty($id) ? $id : '';
-          
             DB::beginTransaction();
 
             $isDelete = Common::deleteData($post);

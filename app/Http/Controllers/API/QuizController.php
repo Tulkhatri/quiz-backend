@@ -256,8 +256,10 @@ public function list() {
                 $mappedData[] = [
                     'id' => $quiz->id,
                     'title' => $quiz->title,
-                    'category_id' => $quiz->category->name ?? null,
-                    'difficulty_level_id' => $quiz->difficultyLevel->name ?? null,
+                    'category_id' => $quiz->category->id ?? null,
+                    'difficulty_level_id' => $quiz->difficultyLevel->id ?? null,
+                    'category_name' => $quiz->category->name ?? null,
+                    'difficulty_level_name' => $quiz->difficultyLevel->name ?? null,
                     'time_limit_minutes' => $quiz->time_limit_minutes,
                 ];
         }
