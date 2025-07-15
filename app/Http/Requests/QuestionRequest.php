@@ -24,6 +24,7 @@ class QuestionRequest extends FormRequest
         return [
             'question_text'=>'required|string',
             'quiz_id'=>'required',
+            'id' => 'nullable',
              ];
     }
 

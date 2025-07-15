@@ -117,19 +117,19 @@ class QuestionController extends AppController
  * )
  */
 
- public function save(QuestionRequest $request,$id = null) {
+ public function save(QuestionRequest $request) {
     try{
         $post =$request->validated();
         $userid= Auth::user()->id;
         $post['table'] = 'questions';
-        $post['editid'] = !empty($id) ? $id : '';
+        $post['id'] = !empty($post['id']) ? $post['id'] : '';
 
         $insertArray = [
                      'quiz_id' => $post['quiz_id'],
                      'question_text' => $post['question_text'],
                      ];
 
-            if(!empty($post['editid'])){
+            if(!empty($post['id'])){
                 $insertArray['updated_by'] = $userid;
                 $insertArray['updated_at'] = date('Y-m-d H:i:s');
             } else {
@@ -145,7 +145,7 @@ class QuestionController extends AppController
                     throw new Exception ("Couldn't save data. Please, try again.", 1);
                 }
                 $this->response=true;
-                if(empty($post['editid'])){
+                if(empty($post['id'])){
                     $this->message="Data inserted successfully";
                 }else{
                     $this->message="Data Updated successfully";
@@ -227,6 +227,7 @@ public function list() {
            foreach ($data as $question) {
                 $mappedData[] = [
                     'id' => $question->id,
+                    'quiz_id' => $question->quiz->id ?? null,
                     'quiz_name' => $question->quiz->title ?? null,
                     'question_text' => $question->question_text,
                 ];
