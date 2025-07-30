@@ -54,17 +54,13 @@ class Common extends Model
     }
 
 
-    public static function getJsonData($status, $message, $response, $otherkey = false, $otherval = false){
+    public static function getJsonData($statusCode, $message, $response= false){
             $array = [
-                'status' => $status,
                 'message' => $message,
             ];
-            if (!empty($otherval)) {
-                $array[$otherkey] = $otherval;
-            }
             if(!empty($response)){
                  $array['response'] = $response;
             }
-        return response()->json($array, $status); 
+        return response()->json($array, $statusCode); 
     }
 }

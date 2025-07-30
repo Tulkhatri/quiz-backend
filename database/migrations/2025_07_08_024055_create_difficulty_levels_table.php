@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('difficulty_levels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('status',['Y','N'])->default('Y');
+            $table->softDeletes();
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();

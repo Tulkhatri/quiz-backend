@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->enum('status',['Y','N'])->default('Y');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

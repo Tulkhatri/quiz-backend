@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('is_correct',['Y','N'])->default('N');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->enum('status',['Y','N'])->default('Y');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

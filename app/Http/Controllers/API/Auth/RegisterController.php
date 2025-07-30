@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Auth;
 use App\Http\Controllers\API\AppController;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Common\Common;
+use App\Models\User;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -45,58 +46,55 @@ class RegisterController extends AppController
 *        ),
 *    ),
 *    @OA\Response(
-*        response=201,
-*        description="Login Successfully",
-*        @OA\JsonContent()
-*    ),
-*    @OA\Response(
 *        response=200,
 *        description="Login Successfully",
-*        @OA\JsonContent()
-*    ),
-*    @OA\Response(
-*        response=422,
-*        description="Unprocessable Entity",
-*        @OA\JsonContent()
-*    ),
-*    @OA\Response(response=400, description="Bad request"),
-*    @OA\Response(response=404, description="Resource Not Found"),
+*        @OA\JsonContent(
+*           type="object",
+*             @OA\Property(property="message", type="string", example="User register successfully"),
+*            )
+*        ),
+*
+*      @OA\Response(
+ *        response=422,
+ *        description="Unprocessable Entity - Validation Error",
+ *        @OA\JsonContent(
+ *            type="object",
+ *            @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *            @OA\Property(
+ *                property="errors",
+ *                type="object",
+ *                example={
+ *                    "email": {
+ *                        "The email has already been taken."
+ *                    }
+ *                }
+ *            )
+ *        )
+ *    ),
 * )
 */
 public function register(RegisterRequest $request) {
     try{
-        $post =$request->validated();
-        $post['table'] = 'users';
-        $post['editid'] = '';
+        $validatedData =$request->validated();
+        $validatedData['password'] = Hash::make($validatedData['password']);
+      
+        DB::beginTransaction();
+        if (!User::create($validatedData)) {
+            throw new Exception ("Couldn't register data.Please, try again.", 422);
+        }
+        $this->message="User register successfully";
 
-        $insertArray = [
-                     'name' => $post['name'],
-                     'email' => $post['email'],
-                     'password' => Hash::make($post['password']),
-                     'created_at' => date('Y-m-d H:i:s')
-                     ];
-
-            $post['insertArray'] = $insertArray;
-            DB::beginTransaction();
-            $isRegistered = Common::saveData($post);
-                if (!$isRegistered) {
-                    throw new Exception ("Couldn't register data.Please, try again.", 1);
-                }
-                $this->response=true;
-                $this->message="User register successfully";
-               
-
-            DB::commit();
+        DB::commit();
     } catch(QueryException $e) {
         DB::rollBack();
-        $this->status=500;
+        $this->statusCode=$this->queryStatus;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
         DB::rollBack();
-        $this->status=301;
+        $this->statusCode=$e->getCode();
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
         }
      
  }

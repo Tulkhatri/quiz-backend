@@ -43,24 +43,31 @@ class CategoryController extends AppController
  *             )
  *         )
  *     ),
- *       @OA\Response(
- *          response=200,
- *          description="Category created successfully",
- *          @OA\JsonContent()
- *      ),
  *     @OA\Response(
  *         response=201,
  *         description="Category created successfully",
- *          @OA\JsonContent()
+ *          @OA\JsonContent(
+ *              type="object",
+ *              @OA\Property(property="message",type="string",example="Category save successfully"),
+ *          )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=200,
+ *         description="Category updated successfully",
+ *          @OA\JsonContent(
+ *              type="object",
+ *              @OA\Property(property="message",type="string",example="Category updated successfully"),
+ *          )
  *     ),
  *     @OA\Response(
  *         response=422,
  *         description="Validation error",
+ *         @OA\JsonContent(
+ *          type="object",
+ *          @OA\Property(property="message",type="strign",example="Invalid data")
+ *          )
  *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthorized",
- *     )
  * )
  * 
  * 
@@ -103,60 +110,46 @@ class CategoryController extends AppController
  *         response=422,
  *         description="Validation error"
  *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthorized"
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Category not found"
- *     )
  * )
  */
 
 public function save(CategoryRequest $request) {
     try{
-        $post =$request->validated();
-        $userid= Auth::user()->id;
-        $post['table'] = 'categories';
-        $post['id'] = !empty($post['id']) ? $post['id'] : '';
-        $insertArray = [
-                     'name' => $post['name'],
-                     ];
-
-            if(!empty($post['id'])){
-                $insertArray['updated_by'] = $userid;
-                $insertArray['updated_at'] = date('Y-m-d H:i:s');
-            } else {
-                $insertArray['created_by'] = $userid;
-                $insertArray['created_at'] = date('Y-m-d H:i:s');
+        $validatedData = $request->validated();
+        $userId = Auth::id();
+        DB::beginTransaction();
+       if ($validatedData['id']) {
+            $category = Category::find($validatedData['id']);
+            if (!$category) {
+                throw new Exception("Category not found with the given ID", 404);
             }
+            $validatedData['updated_by'] = $userId;
+            if (!$category->update($validatedData)) {
+                throw new Exception("Couldn't update data. Please, try again.", 422);
+            }
+            $this->message = "Data updated successfully";
 
-            $post['insertArray'] = $insertArray;
-            DB::beginTransaction();
-            $isSaved = Common::saveData($post);
-                if (!$isSaved) {
-                    throw new Exception ("Couldn't save data.Please, try again.", 1);
-                }
-                $this->response=true;
-                if(empty($post['id'])){
-                    $this->message="Data inserted successfully";
-                }else{
-                    $this->message="Data Updated successfully";
-                }
+        } else {
+            $validatedData['created_by'] = $userId;
+            if (!Category::create($validatedData)) {
+                throw new Exception("Couldn't save data. Please, try again.", 422);
+            }
+            $this->message = "Data inserted successfully";
+            $this->statusCode=201;
+        }
 
-            DB::commit();
+        DB::commit();
     } catch(QueryException $e) {
         DB::rollBack();
-        $this->status=500;
+        $this->statusCode=$this->queryStatus;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
         DB::rollBack();
-        $this->status=301;
+        $this->statusCode=$e->getCode();
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
-}
+     return Common::getJsonData($this->statusCode, $this->message);
+ }
 
 /**
  *  @OA\Get(
@@ -167,11 +160,10 @@ public function save(CategoryRequest $request) {
  *     summary="Get a list of active categories",
  *     description="Returns a list of categories with status 'Y'.",
  *     @OA\Response(
- *         response=200,
+ *         response=201,
  *         description="Successful response",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer", example=200),
  *             @OA\Property(property="message", type="string", example="Data retrieved successfully."),
  *             @OA\Property(
  *                 property="data",
@@ -211,19 +203,21 @@ public function list() {
         $data=[];
         $data = Category::listData();
             if (!$data) {
-                throw new Exception ("Couldn't get data.Please, try again.", 1);
+                throw new Exception ("Couldn't get data.Please, try again.", 500);
             }
             $this->message="Data listed successfully";
             $this->response=$data;
 
-    } catch(QueryException $e) {
-        $this->status=500;
+   } catch(QueryException $e) {
+        DB::rollBack();
+        $this->statusCode=$this->queryStatus;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
-        $this->status=301;
+        DB::rollBack();
+        $this->statusCode=$e->getCode();
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
 }
 
 
@@ -268,10 +262,10 @@ public function delete($id){
             $post['table'] = 'categories';
             $post['deleteid'] = !empty($id) ? $id : '';
             DB::beginTransaction();
-
+            $model = Category::findOrFail($id);
             $isDelete = Common::deleteData($post);
             if (!$isDelete) {
-                throw new Exception ("Couldn't delete data. Please, try again.", 1);
+                throw new Exception ("Couldn't delete data. Please, try again.", 500);
             }
             $this->response=true;
             $this->message="Data deleted successfully";
@@ -280,13 +274,13 @@ public function delete($id){
 
     } catch(QueryException $e) {
         DB::rollBack();
-        $this->status=500;
+        $this->statusCode=$this->queryStatus;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
         DB::rollBack();
-        $this->status=301;
+        $this->statusCode=$e->getCode();
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
-    }
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
+        }
 }

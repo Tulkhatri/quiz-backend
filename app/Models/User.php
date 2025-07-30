@@ -2,11 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+
+    use SoftDeletes;
+    
+    protected $dates = ['deleted_at'];
+    
+    public function isActive()
+    {
+        return !$this->trashed();
+    }
+
+    public function deactivate()
+    {
+        return $this->delete(); // Soft delete
+    }
+
+    public function activate()
+    {
+        return $this->restore();
+    }
+
+
     //has many is not needed for given database table structure so i cannot define relation here 
 
     public function getJWTIdentifier()

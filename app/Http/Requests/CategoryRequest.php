@@ -19,11 +19,19 @@ class CategoryRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'id' => $this->route('id')
+        ]);
+    }
+
     public function rules(): array
     {
         return [
             'name'=>'required|string|max:255',
-            'id'=>'nullable'
+            'id' => 'nullable|exists:categories,id'
         ];
     }
     public function messages(): array
@@ -32,6 +40,7 @@ class CategoryRequest extends FormRequest
             'name.required' => 'Category name is required.',
             'name.string' => 'Category name must be a valid string.',
             'name.max' => 'Category name may not be greater than 255 characters.',
+            'id.exists'     => 'The selected record does not exist.',
         ];
     }
 }

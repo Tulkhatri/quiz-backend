@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('time_limit_minutes');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->enum('status',['Y','N'])->default('Y');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

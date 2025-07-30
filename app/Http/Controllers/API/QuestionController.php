@@ -154,14 +154,14 @@ class QuestionController extends AppController
             DB::commit();
     } catch(QueryException $e) {
         DB::rollBack();
-        $this->status=500;
+        $this->statusCode=500;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
         DB::rollBack();
-        $this->status=301;
+        $this->statusCode=301;
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
 }
 
 /**
@@ -236,13 +236,13 @@ public function list() {
         $this->response=$mappedData;
 
     } catch(QueryException $e) {
-        $this->status=500;
+        $this->statusCode=500;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
-        $this->status=301;
+        $this->statusCode=301;
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
 }
 
 
@@ -301,13 +301,13 @@ public function delete($id){
 
     } catch(QueryException $e) {
         DB::rollBack();
-        $this->status=500;
+        $this->statusCode=500;
         $this->message=$this->queryMessage;
     } catch(Exception $e) {
         DB::rollBack();
-        $this->status=301;
+        $this->statusCode=301;
         $this->message=$e->getMessage();
     }
-    return Common::getJsonData($this->status, $this->message, $this->response);
+    return Common::getJsonData($this->statusCode, $this->message, $this->response);
     }
 }
